@@ -32,11 +32,18 @@ y permita ordenar/filtrar las sesiones por lugar, día y hora.
   3. Espera a que el usuario inicie sesión manualmente (incluyendo MFA) y
      llegue a la página del catálogo cargado. Se le pide al usuario que
      presione Enter en la consola cuando el catálogo esté visible.
-  4. Intercepta las respuestas de red (XHR/fetch) que contienen los datos
+  4. El catálogo pagina sus resultados con un botón **"Show More"** al
+     final de la lista. El script hace clic en ese botón repetidamente
+     (esperando a que carguen nuevos elementos entre cada clic) hasta que
+     el botón ya no esté presente o ya no aparezcan sesiones nuevas,
+     asegurando que se cargue la lista completa antes de extraer datos.
+  5. Intercepta las respuestas de red (XHR/fetch) que contienen los datos
      de las sesiones del catálogo, o si no es posible, extrae los datos
-     del DOM ya renderizado.
-  5. Normaliza los datos a una lista de objetos de sesión (ver esquema abajo).
-  6. Escribe el resultado en `data/sessions.json`.
+     del DOM ya renderizado (incluyendo todo lo cargado tras los clics en
+     "Show More").
+  6. Normaliza los datos a una lista de objetos de sesión (ver esquema
+     abajo), eliminando duplicados por `id`.
+  7. Escribe el resultado en `data/sessions.json`.
 - Documentado con instrucciones claras de uso en el README.
 
 ### 2. Esquema de datos de sesión
