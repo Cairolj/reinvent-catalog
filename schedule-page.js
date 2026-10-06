@@ -1,8 +1,10 @@
 import { timeKey, compareDays, roomDetail } from './lib/sessions.js';
 import { loadSelectedIds, saveSelectedIds, toggleSelection, detectConflicts, layoutOverlappingSessions } from './lib/schedule.js';
+import { buildIcsCalendar } from './lib/export.js';
 import { escapeHtml, openModal, wireModalGlobalEvents } from './modal.js';
 
 const PX_PER_HOUR = 80;
+const EVENT_YEAR = 2026;
 
 const state = {
   allSessions: [],
@@ -133,11 +135,27 @@ function renderUnscheduledList(sessions) {
   });
 }
 
+function downloadIcsFile() {
+  const sessions = selectedSessions();
+  const ics = buildIcsCalendar(sessions, { year: EVENT_YEAR });
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'my-reinvent-schedule.ics';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 function render() {
   const sessions = selectedSessions();
   const emptyMessage = document.getElementById('empty-schedule-message');
   const calendar = document.getElementById('calendar');
+  const exportButton = document.getElementById('export-ics-button');
   calendar.innerHTML = '';
+  exportButton.hidden = sessions.filter(isScheduled).length === 0;
 
   if (sessions.length === 0) {
     emptyMessage.hidden = false;
@@ -184,6 +202,7 @@ async function init() {
   state.selectedIds = loadSelectedIds(window.localStorage);
   await loadAllSessions();
   wireModalGlobalEvents();
+  document.getElementById('export-ics-button').addEventListener('click', downloadIcsFile);
   render();
 }
 

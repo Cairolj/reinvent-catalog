@@ -70,7 +70,7 @@ function render() {
   const conflictingIds = getConflictingWithSelectionIds(state.sessions, state.selectedIds);
 
   if (state.hideConflicts) {
-    result = result.filter((session) => !conflictingIds.has(session.id));
+    result = result.filter((session) => !conflictingIds.has(session.id) || state.selectedIds.includes(session.id));
   }
 
   if (result.length === 0) {
