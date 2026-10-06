@@ -14,13 +14,11 @@
         <a href="schedule.html">My Schedule</a>
       </nav>
     </div>
+    <div class="day-tabs" id="day-tabs"></div>
     <div class="controls">
       <input type="text" id="search-input" placeholder="Search by title, description, speaker, service or track..." />
       <select id="venue-filter">
         <option value="">All venues</option>
-      </select>
-      <select id="day-filter">
-        <option value="">All days</option>
       </select>
       <label class="checkbox-filter">
         <input type="checkbox" id="hide-conflicts-filter" />
@@ -31,23 +29,59 @@
   </header>
 
   <main>
-    <table id="sessions-table">
-      <thead>
-        <tr>
-          <th class="select-column">Add</th>
-          <th data-field="title">Title</th>
-          <th data-field="venue">Venue</th>
-          <th data-field="room">Room</th>
-          <th data-field="day">Day</th>
-          <th data-field="startTime">Time</th>
-          <th data-field="level">Level</th>
-          <th data-field="type">Type</th>
-          <th data-field="topics">Topic</th>
-          <th data-field="speakers">Speakers</th>
-        </tr>
-      </thead>
-      <tbody id="sessions-tbody"></tbody>
-    </table>
+    <div class="table-scroll-container">
+      <!-- Header lives in its own table, outside the scrolling area below.
+           This avoids position:sticky on a <th> entirely, which has a
+           long-standing Chrome rendering bug where scrolled table rows can
+           paint on top of a sticky header. The two tables share identical
+           <colgroup> column classes so their widths always stay in sync
+           when columns are resized (see wireColumnResize in app.js). -->
+      <table id="header-table" class="sessions-table">
+        <colgroup>
+          <col class="col-select" />
+          <col class="col-title" />
+          <col class="col-venue" />
+          <col class="col-room" />
+          <col class="col-day" />
+          <col class="col-startTime" />
+          <col class="col-level" />
+          <col class="col-type" />
+          <col class="col-topics" />
+          <col class="col-speakers" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="select-column" data-field="select">Add</th>
+            <th data-field="title">Title</th>
+            <th data-field="venue">Venue</th>
+            <th data-field="room">Room</th>
+            <th data-field="day">Day</th>
+            <th data-field="startTime">Time</th>
+            <th data-field="level">Level</th>
+            <th data-field="type">Type</th>
+            <th data-field="topics">Topic</th>
+            <th data-field="speakers">Speakers</th>
+          </tr>
+        </thead>
+      </table>
+      <div class="table-body-scroll">
+        <table id="sessions-table" class="sessions-table">
+          <colgroup>
+            <col class="col-select" />
+            <col class="col-title" />
+            <col class="col-venue" />
+            <col class="col-room" />
+            <col class="col-day" />
+            <col class="col-startTime" />
+            <col class="col-level" />
+            <col class="col-type" />
+            <col class="col-topics" />
+            <col class="col-speakers" />
+          </colgroup>
+          <tbody id="sessions-tbody"></tbody>
+        </table>
+      </div>
+    </div>
     <p id="empty-message" hidden>No sessions match your filters.</p>
   </main>
 

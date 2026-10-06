@@ -72,6 +72,43 @@ header h1 {
   background: #37475a;
 }
 
+.day-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.day-tab {
+  background: #37475a;
+  color: #d5d9df;
+  border: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: 6px 6px 0 0;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.day-tab:hover {
+  background: #475b73;
+  color: white;
+}
+
+.day-tab-active {
+  background: #ff9900;
+  color: #1a1a1a;
+}
+
+.day-tab-active:hover {
+  background: #ff9900;
+}
+
+.day-tab-unscheduled {
+  border-left: 2px dashed #7a8a9c;
+  margin-left: 0.25rem;
+}
+
 .controls {
   display: flex;
   gap: 1rem;
@@ -111,15 +148,36 @@ header h1 {
 
 main {
   flex: 1 1 auto;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   padding: 1.5rem 2rem;
 }
 
-table {
+.table-scroll-container {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: white;
+}
+
+.table-body-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.sessions-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   background: white;
   table-layout: fixed;
+}
+
+#header-table {
+  flex: 0 0 auto;
 }
 
 th, td {
@@ -136,8 +194,12 @@ th {
   background: #e9ecef;
   cursor: pointer;
   user-select: none;
-  position: sticky;
-  top: 0;
+  position: relative;
+  box-shadow: 0 1px 0 #ccc;
+}
+
+th.select-column {
+  cursor: default;
 }
 
 .col-resizer {
