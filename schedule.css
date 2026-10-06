@@ -1,0 +1,141 @@
+.calendar {
+  overflow-x: auto;
+}
+
+.calendar-grid {
+  display: flex;
+  align-items: flex-start;
+  min-width: max-content;
+}
+
+.time-axis {
+  display: flex;
+  flex-direction: column;
+  width: 70px;
+  flex-shrink: 0;
+  padding-top: 2.5rem;
+}
+
+.time-axis-label {
+  font-size: 0.8rem;
+  color: #666;
+  border-top: 1px solid #eee;
+  padding-top: 2px;
+  box-sizing: border-box;
+}
+
+.day-column {
+  width: 220px;
+  flex-shrink: 0;
+  border-left: 1px solid #ddd;
+}
+
+.day-column-header {
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  background: #232f3e;
+  color: white;
+  font-size: 0.9rem;
+  position: sticky;
+  top: 0;
+}
+
+.day-column-body {
+  position: relative;
+  background: repeating-linear-gradient(
+    to bottom,
+    #fafafa 0,
+    #fafafa 79px,
+    #eee 80px
+  );
+}
+
+.event-block {
+  position: absolute;
+  background: #e0f0ff;
+  border: 1px solid #075098;
+  border-radius: 4px;
+  padding: 0.3rem 0.4rem;
+  font-size: 0.7rem;
+  overflow: hidden;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.event-block:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.event-conflict {
+  background: #ffe0e0;
+  border-color: #c0392b;
+}
+
+.event-title {
+  font-weight: bold;
+  margin-bottom: 0.15rem;
+}
+
+.event-time,
+.event-location {
+  color: #444;
+}
+
+.event-conflict-badge {
+  color: #c0392b;
+  font-weight: bold;
+  margin-top: 0.2rem;
+}
+
+#empty-schedule-message {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #555;
+  font-size: 1rem;
+}
+
+.unscheduled-section {
+  margin-top: 2rem;
+}
+
+.unscheduled-list {
+  list-style: none;
+  padding: 0;
+  background: white;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.unscheduled-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.unscheduled-title {
+  cursor: pointer;
+}
+
+.unscheduled-title:hover {
+  text-decoration: underline;
+}
+
+.unscheduled-remove {
+  background: none;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.unscheduled-remove:hover {
+  background: #c0392b;
+  color: white;
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>re:Invent 2026 Catalog</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div class="header-top">
+      <h1>re:Invent 2026 Session Catalog</h1>
+      <nav class="page-nav">
+        <a href="schedule.html">My Schedule</a>
+      </nav>
+    </div>
+    <div class="controls">
+      <input type="text" id="search-input" placeholder="Search by title, description, speaker, service or track..." />
+      <select id="venue-filter">
+        <option value="">All venues</option>
+      </select>
+      <select id="day-filter">
+        <option value="">All days</option>
+      </select>
+      <label class="checkbox-filter">
+        <input type="checkbox" id="hide-conflicts-filter" />
+        Hide conflicting sessions
+      </label>
+      <span id="result-count" class="result-count"></span>
+    </div>
+  </header>
+
+  <main>
+    <table id="sessions-table">
+      <thead>
+        <tr>
+          <th class="select-column">Add</th>
+          <th data-field="title">Title</th>
+          <th data-field="venue">Venue</th>
+          <th data-field="room">Room</th>
+          <th data-field="day">Day</th>
+          <th data-field="startTime">Time</th>
+          <th data-field="level">Level</th>
+          <th data-field="type">Type</th>
+          <th data-field="topics">Topic</th>
+          <th data-field="speakers">Speakers</th>
+        </tr>
+      </thead>
+      <tbody id="sessions-tbody"></tbody>
+    </table>
+    <p id="empty-message" hidden>No sessions match your filters.</p>
+  </main>
+
+  <div id="session-modal" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button id="modal-close" class="modal-close" type="button" aria-label="Close">&times;</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
