@@ -163,9 +163,32 @@ function setColumnWidthPx(field, widthPx) {
   });
 }
 
+function clearColumnWidth(field) {
+  document.querySelectorAll(`.col-${field}`).forEach((col) => {
+    col.style.width = '';
+  });
+}
+
+// Column resize is a desktop-only interaction (drag handles use mouse
+// events, which don't fire from touch). Below this width the table relies
+// on .table-horizontal-scroll for horizontal swiping instead, with columns
+// sized evenly. Widths saved from an earlier desktop session must NOT be
+// replayed here: a column resized down to e.g. 30px on desktop would force
+// that same 30px width in the narrow mobile table too, squeezing text into
+// a vertical, letter-by-letter wrap regardless of the table's total width.
+const MOBILE_BREAKPOINT_PX = 640;
+
+function isMobileViewport() {
+  return window.innerWidth <= MOBILE_BREAKPOINT_PX;
+}
+
 function applyStoredColumnWidths() {
   const widths = loadColumnWidths(window.localStorage);
-  Object.entries(widths).forEach(([field, widthPx]) => setColumnWidthPx(field, widthPx));
+  if (isMobileViewport()) {
+    Object.keys(widths).forEach(clearColumnWidth);
+  } else {
+    Object.entries(widths).forEach(([field, widthPx]) => setColumnWidthPx(field, widthPx));
+  }
 }
 
 function wireColumnResize() {
@@ -294,6 +317,8 @@ function wireEvents() {
   });
 
   wireModalGlobalEvents();
+
+  window.addEventListener('resize', debounce(applyStoredColumnWidths, 200));
 }
 
 async function init() {
