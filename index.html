@@ -29,7 +29,8 @@
   </header>
 
   <main>
-    <div class="table-scroll-container">
+    <div class="table-horizontal-scroll">
+      <div class="table-scroll-container">
       <!-- Header lives in its own table, outside the scrolling area below.
            This avoids position:sticky on a <th> entirely, which has a
            long-standing Chrome rendering bug where scrolled table rows can
@@ -80,6 +81,7 @@
           </colgroup>
           <tbody id="sessions-tbody"></tbody>
         </table>
+      </div>
       </div>
     </div>
     <p id="empty-message" hidden>No sessions match your filters.</p>

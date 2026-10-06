@@ -154,12 +154,20 @@ main {
   padding: 1.5rem 2rem;
 }
 
-.table-scroll-container {
+.table-horizontal-scroll {
   flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
+  overflow-x: auto;
+  overflow-y: hidden;
   min-height: 0;
   background: white;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 900px;
 }
 
 .table-body-scroll {
@@ -401,4 +409,77 @@ body.modal-open {
 
 .modal-schedule-toggle:hover {
   background: #e68a00;
+}
+
+/* ---- Mobile adjustments ---- */
+@media (max-width: 640px) {
+  header {
+    padding: 0.75rem 1rem;
+  }
+
+  header h1 {
+    font-size: 1.1rem;
+  }
+
+  .header-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-nav a {
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .export-button {
+    width: 100%;
+  }
+
+  .day-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+
+  .day-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+
+  .controls input,
+  .controls select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .result-count {
+    margin-left: 0;
+    text-align: center;
+  }
+
+  main {
+    padding: 0.75rem;
+  }
+
+  .modal {
+    padding: 1.25rem;
+    max-height: 90vh;
+  }
+
+  .modal-session-title {
+    font-size: 1.1rem;
+  }
 }
