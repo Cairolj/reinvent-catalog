@@ -270,6 +270,25 @@ tbody tr:hover {
   background: #ffe9e9;
 }
 
+.seats-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.seats-badge-walkup {
+  background: #e6f7ec;
+  color: #1e6b1e;
+}
+
+.seats-badge-limited {
+  background: #fff0e0;
+  color: #9a5b00;
+}
+
 .conflict-icon {
   display: block;
   color: #c0392b;
@@ -370,6 +389,10 @@ body.modal-open {
   font-size: 0.9rem;
 }
 
+.modal-seats {
+  margin: 0 0 0.8rem 0;
+}
+
 .modal-description {
   line-height: 1.5;
   margin-bottom: 1rem;
@@ -377,6 +400,59 @@ body.modal-open {
 
 .modal-section {
   margin-bottom: 0.8rem;
+}
+
+.modal-override-form {
+  background: #f5f5f5;
+  border: 1px dashed #aaa;
+  border-radius: 6px;
+  padding: 0.8rem;
+}
+
+.override-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.4rem;
+}
+
+.override-fields select,
+.override-fields input[type="time"] {
+  padding: 0.4rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+
+.override-save-btn,
+.override-clear-btn {
+  padding: 0.4rem 0.9rem;
+  border-radius: 4px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.override-save-btn {
+  background: #ff9900;
+  color: #1a1a1a;
+}
+
+.override-save-btn:hover {
+  background: #e68a00;
+}
+
+.override-clear-btn {
+  background: none;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+}
+
+.override-clear-btn:hover {
+  background: #c0392b;
+  color: white;
 }
 
 .meta-label {

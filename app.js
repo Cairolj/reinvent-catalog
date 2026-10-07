@@ -1,13 +1,17 @@
-import { filterSessions, searchSessions, sortSessions, compareDays, roomDetail, speakerNames } from './lib/sessions.js';
+import { filterSessions, searchSessions, sortSessions, compareDays, roomDetail, speakerNames, seatsLabel } from './lib/sessions.js';
 import { loadSelectedIds, saveSelectedIds, toggleSelection, getConflictingWithSelectionIds } from './lib/schedule.js';
 import { loadColumnWidths, saveColumnWidths, setColumnWidth } from './lib/columnWidths.js';
+import { loadOverrides, saveOverrides, setOverride, clearOverride, applyOverride } from './lib/overrides.js';
 import { escapeHtml, openModal, wireModalGlobalEvents } from './modal.js';
 
 const UNSCHEDULED_DAY = '__unscheduled__';
 
 const state = {
+  rawSessions: [],
   sessions: [],
   sessionsById: new Map(),
+  overrides: {},
+  eventDays: [],
   query: '',
   venue: '',
   day: '',
@@ -22,10 +26,15 @@ function recomputeConflicts() {
   state.conflictingIds = getConflictingWithSelectionIds(state.sessions, state.selectedIds);
 }
 
+function recomputeSessions() {
+  state.sessions = state.rawSessions.map((session) => applyOverride(session, state.overrides));
+  state.sessionsById = new Map(state.sessions.map((s) => [s.id, s]));
+}
+
 async function loadSessions() {
   const response = await fetch('data/sessions.json');
-  state.sessions = await response.json();
-  state.sessionsById = new Map(state.sessions.map((s) => [s.id, s]));
+  state.rawSessions = await response.json();
+  recomputeSessions();
 }
 
 function populateVenueOptions() {
@@ -78,12 +87,40 @@ function toggleSessionSelection(sessionId) {
   render();
 }
 
+function saveSessionOverride(sessionId, day, startTime, endTime) {
+  state.overrides = setOverride(state.overrides, sessionId, { day, startTime, endTime });
+  saveOverrides(state.overrides, window.localStorage);
+  recomputeSessions();
+  recomputeConflicts();
+  render();
+  // Re-open with the freshly-overridden session so the modal reflects the
+  // new day/time immediately instead of showing stale data.
+  openSessionModal(state.sessionsById.get(sessionId));
+}
+
+function clearSessionOverride(sessionId) {
+  state.overrides = clearOverride(state.overrides, sessionId);
+  saveOverrides(state.overrides, window.localStorage);
+  recomputeSessions();
+  recomputeConflicts();
+  render();
+  openSessionModal(state.sessionsById.get(sessionId));
+}
+
 function openSessionModal(session) {
+  const rawSession = state.rawSessions.find((s) => s.id === session.id);
   openModal(session, {
     isSelected: state.selectedIds.includes(session.id),
     onToggle: () => {
       toggleSessionSelection(session.id);
       openSessionModal(session);
+    },
+    scheduleOverride: {
+      availableDays: state.eventDays,
+      hasOverride: Boolean(state.overrides[session.id]),
+      isUnscheduledOriginally: rawSession ? !rawSession.day : false,
+      onSave: (day, startTime, endTime) => saveSessionOverride(session.id, day, startTime, endTime),
+      onClear: () => clearSessionOverride(session.id),
     },
   });
 }
@@ -94,6 +131,7 @@ function rowHtml(session) {
     : '';
   const isSelected = state.selectedIds.includes(session.id);
   const hasConflict = state.conflictingIds.has(session.id);
+  const seats = seatsLabel(session);
 
   return `
     <tr class="session-row${hasConflict ? ' session-row-conflict' : ''}" tabindex="0" data-session-id="${escapeHtml(session.id)}" ${hasConflict ? 'title="Overlaps in time with a session already in My Schedule"' : ''}>
@@ -110,6 +148,7 @@ function rowHtml(session) {
       <td>${escapeHtml(session.type) || '—'}</td>
       <td>${escapeHtml((session.topics || []).join(', '))}</td>
       <td>${escapeHtml(speakerNames(session))}</td>
+      <td>${seats ? `<span class="seats-badge${session.isWalkUpOnly ? ' seats-badge-walkup' : ' seats-badge-limited'}">${escapeHtml(seats)}</span>` : ''}</td>
     </tr>
   `;
 }
@@ -323,9 +362,11 @@ function wireEvents() {
 
 async function init() {
   state.selectedIds = loadSelectedIds(window.localStorage);
+  state.overrides = loadOverrides(window.localStorage);
   await loadSessions();
 
   const days = [...new Set(state.sessions.map((s) => s.day).filter(Boolean))].sort(compareDays);
+  state.eventDays = days;
   const hasUnscheduled = state.sessions.some((s) => !s.day);
   state.day = days[0] || (hasUnscheduled ? UNSCHEDULED_DAY : '');
 

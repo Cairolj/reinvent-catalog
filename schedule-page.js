@@ -1,19 +1,30 @@
 import { timeKey, compareDays, roomDetail } from './lib/sessions.js';
 import { loadSelectedIds, saveSelectedIds, toggleSelection, detectConflicts, layoutOverlappingSessions } from './lib/schedule.js';
 import { buildIcsCalendar } from './lib/export.js';
+import { loadOverrides, saveOverrides, setOverride, clearOverride, applyOverride } from './lib/overrides.js';
 import { escapeHtml, openModal, wireModalGlobalEvents } from './modal.js';
 
 const PX_PER_HOUR = 80;
 const EVENT_YEAR = 2026;
 
 const state = {
+  rawSessions: [],
   allSessions: [],
+  sessionsById: new Map(),
+  overrides: {},
+  eventDays: [],
   selectedIds: [],
 };
 
 async function loadAllSessions() {
   const response = await fetch('data/sessions.json');
-  state.allSessions = await response.json();
+  state.rawSessions = await response.json();
+  recomputeSessions();
+}
+
+function recomputeSessions() {
+  state.allSessions = state.rawSessions.map((session) => applyOverride(session, state.overrides));
+  state.sessionsById = new Map(state.allSessions.map((s) => [s.id, s]));
 }
 
 function selectedSessions() {
@@ -31,7 +42,24 @@ function toggleSessionSelection(sessionId) {
   render();
 }
 
+function saveSessionOverride(sessionId, day, startTime, endTime) {
+  state.overrides = setOverride(state.overrides, sessionId, { day, startTime, endTime });
+  saveOverrides(state.overrides, window.localStorage);
+  recomputeSessions();
+  render();
+  openSessionModal(state.sessionsById.get(sessionId));
+}
+
+function clearSessionOverride(sessionId) {
+  state.overrides = clearOverride(state.overrides, sessionId);
+  saveOverrides(state.overrides, window.localStorage);
+  recomputeSessions();
+  render();
+  openSessionModal(state.sessionsById.get(sessionId));
+}
+
 function openSessionModal(session) {
+  const rawSession = state.rawSessions.find((s) => s.id === session.id);
   openModal(session, {
     isSelected: true,
     onToggle: () => {
@@ -40,6 +68,13 @@ function openSessionModal(session) {
       // since re-opening it would show "Add" for a session no longer shown.
       document.getElementById('session-modal').hidden = true;
       document.body.classList.remove('modal-open');
+    },
+    scheduleOverride: {
+      availableDays: state.eventDays,
+      hasOverride: Boolean(state.overrides[session.id]),
+      isUnscheduledOriginally: rawSession ? !rawSession.day : false,
+      onSave: (day, startTime, endTime) => saveSessionOverride(session.id, day, startTime, endTime),
+      onClear: () => clearSessionOverride(session.id),
     },
   });
 }
@@ -200,7 +235,9 @@ function render() {
 
 async function init() {
   state.selectedIds = loadSelectedIds(window.localStorage);
+  state.overrides = loadOverrides(window.localStorage);
   await loadAllSessions();
+  state.eventDays = [...new Set(state.allSessions.map((s) => s.day).filter(Boolean))].sort(compareDays);
   wireModalGlobalEvents();
   document.getElementById('export-ics-button').addEventListener('click', downloadIcsFile);
   render();
