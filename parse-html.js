@@ -9,7 +9,7 @@ const inputPath = process.argv[2] || path.join(__dirname, 'data', 'html', 'Event
 const outputPath = path.join(__dirname, 'data', 'sessions.json');
 
 if (!fs.existsSync(inputPath)) {
-  console.error(`No se encontró el archivo de entrada: ${inputPath}`);
+  console.error(`Input file not found: ${inputPath}`);
   process.exit(1);
 }
 
@@ -18,4 +18,4 @@ const rawSessions = parseCatalogHtml(html);
 const sessions = deduplicateById(rawSessions);
 
 fs.writeFileSync(outputPath, JSON.stringify(sessions, null, 2));
-console.log(`Se parsearon ${sessions.length} sesiones (de ${rawSessions.length} encontradas) y se guardaron en ${outputPath}`);
+console.log(`Parsed ${sessions.length} sessions (of ${rawSessions.length} found) and saved to ${outputPath}`);
