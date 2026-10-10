@@ -1,73 +1,122 @@
-# Catálogo re:Invent 2026
+# re:Invent 2026 Catalog
 
-Sitio estático que muestra las sesiones del catálogo de AWS re:Invent 2026,
-permitiendo ordenar y filtrar por lugar, día y hora.
+A static website that displays the AWS re:Invent 2026 catalog sessions,
+allowing you to sort and filter by location, day, and time.
 
-## Requisitos
+## Requirements
 
 - Node.js 18+
 
-## Instalación
+## Installation
 
 ```bash
 npm install
 npx playwright install chromium
 ```
 
-## Ver el sitio localmente
+## View the site locally
 
-Abre `index.html` directamente en el navegador, o sirve la carpeta con
-cualquier servidor estático, por ejemplo:
+Open `index.html` directly in your browser, or serve the folder with
+any static server, for example:
 
 ```bash
 npx serve .
 ```
 
-## Actualizar los datos del catálogo
+## Update catalog data
 
-Hay dos formas de obtener datos actualizados:
+### ⭐ Automatic Credentials System (Recommended)
 
-### Opción A: Guardar el HTML manualmente (recomendada, más simple)
+The application now **automatically extracts credentials in the background** without any action needed:
 
-1. Inicia sesión en el catálogo con tu cuenta de AWS (resolviendo MFA).
-2. Haz clic en "Show More" repetidamente hasta que ya no aparezca el botón
-   (carga todas las sesiones).
-3. Guarda la página completa (Ctrl+S / Cmd+S) como "Página web, completa"
-   en `data/html/Event catalog.html` (sobrescribe el archivo existente).
-4. Corre:
-   ```bash
-   node parse-html.js
-   ```
-5. Esto regenera `data/sessions.json` con todas las sesiones.
+1. **When loading the page:**
+   - The credential interceptor activates silently
+   - Captures any valid credentials from API requests
+   - Saves them to the browser's localStorage
 
-### Opción B: Scraping automatizado con Playwright
+2. **To refresh credentials when they expire:**
+   - Simply **open the catalog page in another tab**:
+     ```
+     https://registration.awsevents.com/flow/awsevents/reinvent2026/event-catalog/page/eventCatalog
+     ```
+   - Credentials will be extracted **automatically in the background**
+   - Return to this page and reload (F5) to use the new credentials
 
-1. Corre `npm run scrape`.
-2. Se abrirá una ventana de Chromium en la URL del catálogo.
-3. Inicia sesión manualmente con tu cuenta de AWS (resolviendo MFA si aplica).
-4. Navega hasta que el catálogo de sesiones esté visible en la página.
-5. Vuelve a la terminal y presiona Enter.
-6. El script expandirá automáticamente toda la lista (clics en "Show More"),
-   extraerá los datos y los guardará en `data/sessions.json`.
+**Benefits:**
+- ✅ Completely automatic - no user interaction needed
+- ✅ No need to manually copy credentials
+- ✅ Credentials are saved and reused for 7 days
+- ✅ Works silently without any unusual displays
 
-Con cualquiera de las dos opciones, al finalizar revisa `data/sessions.json`
-y haz commit/push para publicar los datos actualizados (si el sitio está en
-GitHub Pages, se actualizará automáticamente).
+---
 
-## Mi Agenda (My Schedule)
+### Option A: Use the public API (if the automatic system fails)
 
-Desde el catálogo (`index.html`), cada fila tiene una casilla para agregar
-la sesión a tu agenda personal. Los IDs seleccionados se guardan en el
-`localStorage` del navegador, así que persisten entre recargas (pero son
-específicos de ese navegador/dispositivo).
+1. Get the `rfapiprofileid` and `rfwidgetid` parameters:
+    - Open https://registration.awsevents.com/flow/awsevents/reinvent2026/event-catalog/page/eventCatalog
+    - Log in if necessary
+    - Open DevTools (F12) → Network tab
+    - Apply a filter in the catalog to trigger a request
+    - Look for a POST request to `catalog.awsevents.com/api/sessions`
+    - Copy the values of `rfapiprofileid` and `rfwidgetid` from the headers
 
-Haz clic en "My Schedule" en la barra superior para ir a `schedule.html`,
-donde verás un calendario visual con tus sesiones organizadas por día y
-hora. Las sesiones que se traslapan en horario se resaltan en rojo con una
-advertencia. Las sesiones sin día/hora asignado (ej. "Tabletop Experience")
-aparecen en una lista aparte debajo del calendario.
+2. Run the script with those parameters (replace with real values):
 
-## Ejecutar tests
+    ```bash
+    # Windows (PowerShell)
+    $env:API_PROFILE_ID = "YOUR_PROFILE_ID"
+    $env:RF_WIDGET_ID = "YOUR_WIDGET_ID"
+    npm run fetch
+
+    # macOS/Linux (Bash)
+    export API_PROFILE_ID="YOUR_PROFILE_ID"
+    export RF_WIDGET_ID="YOUR_WIDGET_ID"
+    npm run fetch
+    ```
+
+3. The script will download all sessions automatically and save them to `data/sessions.json`.
+
+### Option B: Save the HTML manually
+
+1. Log in to the catalog with your AWS account (resolving MFA).
+2. Click "Show More" repeatedly until the button no longer appears
+   (loads all sessions).
+3. Save the complete page (Ctrl+S / Cmd+S) as "Complete web page"
+   to `data/html/Event catalog.html` (overwrite the existing file).
+4. Run:
+    ```bash
+    node parse-html.js
+    ```
+5. This regenerates `data/sessions.json` with all sessions.
+
+### Option C: Automated scraping with Playwright
+
+1. Run `npm run scrape`.
+2. A Chromium window will open at the catalog URL.
+3. Log in manually with your AWS account (resolve MFA if needed).
+4. Navigate until the session catalog is visible on the page.
+5. Return to the terminal and press Enter.
+6. The script will automatically expand the entire list (clicks on "Show More"),
+   extract the data and save it to `data/sessions.json`.
+
+With any of the options, when finished review `data/sessions.json`
+and commit/push to publish the updated data (if the site is hosted on
+GitHub Pages, it will update automatically).
+
+## My Schedule
+
+From the catalog (`index.html`), each row has a checkbox to add
+the session to your personal schedule. The selected IDs are saved in the
+browser's `localStorage`, so they persist between reloads (but are
+specific to that browser/device).
+
+Click "My Schedule" in the top bar to go to `schedule.html`,
+where you'll see a visual calendar with your sessions organized by day and
+time. Sessions that overlap in time are highlighted in red with a
+warning. Sessions without a day/time assigned (e.g., "Tabletop Experience")
+appear in a separate list below the calendar.
+
+## Run tests
 
 ```bash
 npm test

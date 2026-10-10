@@ -46,24 +46,24 @@ async function main() {
   await page.goto(CATALOG_URL);
 
   await waitForEnter(
-    '\nInicia sesión manualmente (incluyendo MFA) y navega hasta que el catálogo de sesiones esté visible.\nPresiona Enter aquí cuando estés listo para continuar...\n'
+    '\nLog in manually (including MFA) and navigate until the session catalog is visible.\nPress Enter here when you\'re ready to continue...\n'
   );
 
-  console.log('Expandiendo la lista completa de sesiones (clics en "Show More")...');
+  console.log('Expanding the full list of sessions (clicking "Show More")...');
   await expandAllSessions(page);
 
-  console.log('Extrayendo datos de las sesiones...');
+  console.log('Extracting session data...');
   const html = await page.content();
   const rawSessions = parseCatalogHtml(html);
   const sessions = deduplicateById(rawSessions);
 
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(sessions, null, 2));
-  console.log(`Se guardaron ${sessions.length} sesiones en ${OUTPUT_PATH}`);
+  console.log(`Saved ${sessions.length} sessions to ${OUTPUT_PATH}`);
 
   await browser.close();
 }
 
 main().catch((error) => {
-  console.error('Error durante el scraping:', error);
+  console.error('Error during scraping:', error);
   process.exit(1);
 });

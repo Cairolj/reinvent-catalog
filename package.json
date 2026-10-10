@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Sitio estático con el catálogo de sesiones de AWS re:Invent 2026, filtrable por lugar, día y hora.",
+  "description": "Static site with AWS re:Invent 2026 session catalog, filterable by location, day, and time.",
   "scripts": {
     "test": "node --test test/",
     "scrape": "node scrape.js"

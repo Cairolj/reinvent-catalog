@@ -1,122 +1,114 @@
-# Diseño: Catálogo de sesiones re:Invent 2026
+# Design: re:Invent 2026 Session Catalog
 
-## Objetivo
+## Objective
 
-Construir un sitio web estático que recopile la información del catálogo
-de sesiones de AWS re:Invent 2026
+Build a static website that collects information from the AWS re:Invent 2026
+session catalog
 (https://registration.awsevents.com/flow/awsevents/reinvent2026/event-catalog/page/eventCatalog)
-y permita ordenar/filtrar las sesiones por lugar, día y hora.
+and allows sorting/filtering sessions by location, day, and time.
 
-## Contexto y restricciones
+## Context and Constraints
 
-- El catálogo es una SPA: el contenido se carga vía API/JS, no HTML estático.
-- El catálogo requiere login con cuenta AWS, y esa cuenta tiene MFA habilitado.
-  Por lo tanto, la extracción de datos **no puede automatizarse completamente
-  sin intervención humana** (no hay forma de resolver MFA sin un humano).
-- Se opta por un flujo **semi-manual**: el usuario ejecuta un script de
-  scraping localmente cuando quiere refrescar los datos, inicia sesión
-  manualmente (resolviendo MFA), y el script extrae y guarda los datos.
-  No se usan GitHub Actions ni se almacenan credenciales en ningún lado.
-- El sitio final es completamente estático (HTML/CSS/JS vanilla, sin
-  backend, sin build tools) para poder alojarse en GitHub Pages o abrirse
-  localmente.
+- The catalog is a SPA: content is loaded via API/JS, not static HTML.
+- The catalog requires login with an AWS account, and that account has MFA enabled.
+  Therefore, data extraction **cannot be fully automated without human intervention**
+  (there is no way to resolve MFA without a human).
+- A **semi-manual workflow** is chosen: the user runs a scraping script locally
+  when they want to refresh the data, logs in manually (resolving MFA), and the
+  script extracts and saves the data. No GitHub Actions are used and credentials
+  are not stored anywhere.
+- The final site is completely static (HTML/CSS/vanilla JS, no backend, no build
+  tools) so it can be hosted on GitHub Pages or opened locally.
 
-## Componentes
+## Components
 
-### 1. Script de scraping (`scrape.js`)
+### 1. Scraping script (`scrape.js`)
 
-- Node.js + Playwright (modo `headless: false` para permitir login manual).
-- Flujo:
-  1. Abre un navegador Chromium visible.
-  2. Navega a la URL del catálogo.
-  3. Espera a que el usuario inicie sesión manualmente (incluyendo MFA) y
-     llegue a la página del catálogo cargado. Se le pide al usuario que
-     presione Enter en la consola cuando el catálogo esté visible.
-  4. El catálogo pagina sus resultados con un botón **"Show More"** al
-     final de la lista. El script hace clic en ese botón repetidamente
-     (esperando a que carguen nuevos elementos entre cada clic) hasta que
-     el botón ya no esté presente o ya no aparezcan sesiones nuevas,
-     asegurando que se cargue la lista completa antes de extraer datos.
-  5. Intercepta las respuestas de red (XHR/fetch) que contienen los datos
-     de las sesiones del catálogo, o si no es posible, extrae los datos
-     del DOM ya renderizado (incluyendo todo lo cargado tras los clics en
-     "Show More").
-  6. Normaliza los datos a una lista de objetos de sesión (ver esquema
-     abajo), eliminando duplicados por `id`.
-  7. Escribe el resultado en `data/sessions.json`.
-- Documentado con instrucciones claras de uso en el README.
+- Node.js + Playwright (in `headless: false` mode to allow manual login).
+- Flow:
+  1. Opens a visible Chromium browser.
+  2. Navigates to the catalog URL.
+  3. Waits for the user to manually log in (including MFA) and reach the loaded
+     catalog page. The user is asked to press Enter in the console when the
+     catalog is visible.
+  4. The catalog paginates its results with a **"Show More"** button at the end
+     of the list. The script clicks that button repeatedly (waiting for new items
+     to load between each click) until the button is no longer present or no new
+     sessions appear, ensuring the complete list is loaded before extracting data.
+  5. Intercepts network responses (XHR/fetch) containing the catalog session data,
+     or if not possible, extracts data from the already-rendered DOM (including
+     everything loaded after "Show More" clicks).
+  6. Normalizes the data into a list of session objects (see schema below),
+     removing duplicates by `id`.
+  7. Writes the result to `data/sessions.json`.
+- Documented with clear usage instructions in the README.
 
-### 2. Esquema de datos de sesión
+### 2. Session data schema
 
-Cada sesión en `sessions.json` tendrá (cuando el dato esté disponible):
+Each session in `sessions.json` will have (when data is available):
 
 ```json
 {
   "id": "string",
   "title": "string",
   "description": "string",
-  "day": "string (ej. 'Monday, Nov 30')",
-  "startTime": "string (ej. '10:00 AM')",
+  "day": "string (e.g. 'Monday, Nov 30')",
+  "startTime": "string (e.g. '10:00 AM')",
   "endTime": "string",
-  "location": "string (ej. 'Venetian, Level 2, Murano 3205')",
-  "track": "string (categoría/track)",
-  "level": "string (ej. '200 - Intermediate')",
+  "location": "string (e.g. 'Venetian, Level 2, Murano 3205')",
+  "track": "string (category/track)",
+  "level": "string (e.g. '200 - Intermediate')",
   "speakers": ["string"]
 }
 ```
 
-Si algún campo no está disponible en el scraping real, se deja como
-cadena vacía o se omite, sin romper el resto del pipeline.
+If any field is not available in the actual scraping, it is left as an empty
+string or omitted, without breaking the rest of the pipeline.
 
-### 3. Frontend estático
+### 3. Static frontend
 
-- `index.html`: estructura base, tabla/lista de sesiones, controles de
-  filtro y orden.
-- `styles.css`: estilos simples y legibles.
+- `index.html`: base structure, table/list of sessions, filter and sorting controls.
+- `styles.css`: simple and readable styles.
 - `app.js`:
-  - Carga `data/sessions.json` vía `fetch`.
-  - Renderiza las sesiones en una tabla.
-  - Permite ordenar haciendo clic en encabezados de columna (lugar, día,
-    hora).
-  - Provee selectores desplegables para filtrar por lugar y por día.
-  - Provee un campo de búsqueda de texto libre que filtra por
-    título/descripción/ponentes.
-  - Combina filtros y orden de forma reactiva (sin recargar la página).
+  - Loads `data/sessions.json` via `fetch`.
+  - Renders sessions in a table.
+  - Allows sorting by clicking on column headers (location, day, time).
+  - Provides dropdown selectors to filter by location and by day.
+  - Provides a free-text search field that filters by title/description/speakers.
+  - Combines filters and sorting reactively (without reloading the page).
 
-### 4. Flujo de actualización de datos
+### 4. Data update flow
 
-1. El usuario corre `node scrape.js` localmente cuando quiere datos frescos.
-2. Inicia sesión manualmente en la ventana del navegador que se abre.
-3. El script genera/actualiza `data/sessions.json`.
-4. El usuario hace commit y push de los cambios.
-5. Si el sitio está en GitHub Pages, se actualiza automáticamente al hacer
-   push a la rama configurada.
+1. The user runs `node scrape.js` locally when they want fresh data.
+2. They manually log in in the browser window that opens.
+3. The script generates/updates `data/sessions.json`.
+4. The user commits and pushes the changes.
+5. If the site is on GitHub Pages, it updates automatically when pushing to the
+   configured branch.
 
-## Estructura de archivos
+## File structure
 
 ```
 reinvent/
 ├── scrape.js
 ├── package.json
 ├── data/
-│   └── sessions.json       (generado, con datos de ejemplo iniciales)
+│   └── sessions.json       (generated, with initial example data)
 ├── index.html
 ├── styles.css
 ├── app.js
 └── README.md
 ```
 
-## Testing / validación
+## Testing / validation
 
-- No hay tests automatizados del scraper (depende de un sitio externo con
-  login manual); se valida manualmente revisando que `sessions.json` tenga
-  sentido tras cada ejecución.
-- El frontend se valida manualmente en el navegador usando datos de
-  ejemplo (placeholder) antes de tener el JSON real, verificando que el
-  orden y los filtros funcionen correctamente.
+- No automated tests of the scraper (depends on an external site with manual login);
+  it is validated manually by reviewing `sessions.json` makes sense after each run.
+- The frontend is validated manually in the browser using example data (placeholder)
+  before having the real JSON, verifying that sorting and filters work correctly.
 
-## Fuera de alcance
+## Out of scope
 
-- Automatización completa sin intervención humana (bloqueado por MFA).
-- Backend/servidor propio.
-- Autenticación o almacenamiento de credenciales.
+- Full automation without human intervention (blocked by MFA).
+- Backend/own server.
+- Authentication or credential storage.
