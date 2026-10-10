@@ -37,6 +37,42 @@ async function loadSessions() {
   recomputeSessions();
 }
 
+async function refreshSessions() {
+  const button = document.getElementById('refresh-button');
+  const icon = button.querySelector('.refresh-icon');
+  
+  try {
+    button.disabled = true;
+    icon.classList.add('loading');
+    
+    // Fetch fresh data with cache-busting
+    const cacheBuster = new Date().getTime();
+    const response = await fetch(`data/sessions.json?_=${cacheBuster}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to refresh: ${response.statusText}`);
+    }
+    
+    state.rawSessions = await response.json();
+    recomputeSessions();
+    recomputeConflicts();
+    render();
+    
+    // Show success feedback
+    const originalText = button.textContent;
+    button.textContent = '✓ Refreshed';
+    setTimeout(() => {
+      button.textContent = originalText;
+    }, 2000);
+  } catch (error) {
+    console.error('Error refreshing sessions:', error);
+    alert(`Failed to refresh catalog: ${error.message}`);
+  } finally {
+    button.disabled = false;
+    icon.classList.remove('loading');
+  }
+}
+
 function populateVenueOptions() {
   const venues = [...new Set(state.sessions.map((s) => s.venue).filter(Boolean))].sort();
   const venueSelect = document.getElementById('venue-filter');
@@ -311,6 +347,8 @@ function wireEvents() {
     state.hideConflicts = e.target.checked;
     render();
   });
+
+  document.getElementById('refresh-button').addEventListener('click', refreshSessions);
 
   document.querySelectorAll('#header-table th[data-field]:not(.select-column)').forEach((th) => {
     th.addEventListener('click', (e) => {

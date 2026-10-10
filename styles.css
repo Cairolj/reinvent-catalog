@@ -146,6 +146,47 @@ header h1 {
   margin-left: auto;
 }
 
+.refresh-button {
+  background: #ff9900;
+  color: #1a1a1a;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.refresh-button:hover {
+  background: #e68a00;
+}
+
+.refresh-button:active {
+  transform: scale(0.98);
+}
+
+.refresh-icon {
+  display: inline-block;
+  transition: transform 0.6s linear;
+}
+
+.refresh-button.loading .refresh-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 main {
   flex: 1 1 auto;
   display: flex;
